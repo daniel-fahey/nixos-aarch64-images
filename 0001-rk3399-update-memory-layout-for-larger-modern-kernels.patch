@@ -1,0 +1,86 @@
+From f97b8adf9468767fbfc3f24a8e21f3c8dfdafe72 Mon Sep 17 00:00:00 2001
+From: Daniel Fahey <daniel.fahey@pm.me>
+Date: Thu, 12 Sep 2024 16:48:42 +0100
+Subject: [PATCH] rk3399 update memory layout for larger modern kernels
+
+0x05E00000 bytes (94 MiB) available for kernel. Ramdisk starts last to
+expand.
+---
+ include/configs/rk3399_common.h | 59 ++++++++++++++++++++++++++++-----
+ 1 file changed, 50 insertions(+), 9 deletions(-)
+
+diff --git a/include/configs/rk3399_common.h b/include/configs/rk3399_common.h
+index 8e137376..618768d1 100644
+--- a/include/configs/rk3399_common.h
++++ b/include/configs/rk3399_common.h
+@@ -40,17 +40,58 @@
+ 
+ #ifndef CONFIG_SPL_BUILD
+ 
++/*
++Memory layout diagram
++
++0x00000000 +----------------+
++           |                |
++           |                |
++0x00500000 +----------------+ scriptaddr
++           | script         |
++           | 0x00100000     |
++0x00600000 +----------------+ pxefile_addr_r
++           | pxefile        |
++           | 0x00100000     |
++0x00700000 +----------------+ fdt_addr_r
++           | fdt            |
++           | 0x00100000     |
++0x00800000 +----------------+ fdtoverlay_addr_r
++           | fdt overlay    |
++           | 0x1A00000      |
++           |                |
++           |                |
++0x02200000 +----------------+ kernel_addr_r
++           | kernel         |
++           | 0x05E00000     |
++           |                |
++           |                |
++           |                |
++           |                |
++           |                |
++0x08000000 +----------------+ kernel_comp_addr_r
++           | kernel_comp    |
++           | 0x02000000     |
++           |                |
++0x0A000000 +----------------+ ramdisk_addr_r
++           | ramdisk        |
++           | (expandable)   |
++           |                |
++           |                |
++           |                |
++           +----------------+
++*/
++
+ #define ENV_MEM_LAYOUT_SETTINGS \
+-	"scriptaddr=0x00500000\0" \
+-	"script_offset_f=0xffe000\0" \
+-	"script_size_f=0x2000\0" \
+-	"pxefile_addr_r=0x00600000\0" \
+-	"fdt_addr_r=0x01f00000\0" \
+-	"fdtoverlay_addr_r=0x02000000\0" \
+-	"kernel_addr_r=0x02080000\0" \
+-	"ramdisk_addr_r=0x06000000\0" \
++	        "scriptaddr=0x00500000\0" \
++	   "script_offset_f=0x00ffe000\0" \
++	     "script_size_f=0x00002000\0" \
++	    "pxefile_addr_r=0x00600000\0" \
++	        "fdt_addr_r=0x00700000\0" \
++	 "fdtoverlay_addr_r=0x00800000\0" \
++	     "kernel_addr_r=0x02200000\0" \
+ 	"kernel_comp_addr_r=0x08000000\0" \
+-	"kernel_comp_size=0x2000000\0"
++	  "kernel_comp_size=0x02000000\0" \
++	    "ramdisk_addr_r=0x0A000000\0"
+ 
+ #ifndef ROCKCHIP_DEVICE_SETTINGS
+ #define ROCKCHIP_DEVICE_SETTINGS
+-- 
+2.46.0
+
