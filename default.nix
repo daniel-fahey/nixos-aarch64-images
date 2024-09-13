@@ -30,7 +30,6 @@ let
       })
     ];
     postPatch = ''
-      cat include/configs/rk3399_common.h
       patchShebangs tools
       patchShebangs scripts
       patchShebangs arch/arm/mach-rockchip
